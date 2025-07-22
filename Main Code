@@ -136,7 +136,31 @@ print(f'R-squared: {r2}')
 
 # Classification
 
-paypal['Direction'] = (paypal['Target'] > paypal['Close']).astype(int)
+paypal['Direction'] = np.where(paypal['Close'].shift(-1) > paypal['Close'], 1, 0)
 
-X = paypal[['Close']][:-1]
-y = paypal['Direction'][:-1]
+X = paypal[['Close']]
+y = paypal['Direction']
+
+# Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+from sklearn.ensemble import RandomForestClassifier
+classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+
+classifier.fit(X_train, y_train) 
+predictions_class = classifier.predict(X_test)
+
+from sklearn.metrics import classification_report, confusion_matrix
+
+print(confusion_matrix(y_test, predictions_class))
+print(classification_report(y_test, predictions_class))
+
+# Vizualization of Classification Predictions
+
+plt.figure(figsize=(12, 6))
+plt.plot(y_test.values, label='Πραγματικές Τιμές', alpha=0.5)
+plt.plot(predictions_class, label='Προβλέψεις Ταξινόμησης', linestyle='--')
+plt.legend()    
+plt.title('Πρόβλεψη Κατεύθυνσης Τιμής Κλεισίματος - PayPal')
+plt.grid()
+plt.show()
