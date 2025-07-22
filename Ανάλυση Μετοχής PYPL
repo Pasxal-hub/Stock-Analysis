@@ -1,32 +1,32 @@
-# Ανάκτηση Δεδομένων Paypal από το Yahoo Finance
+# PayPal Data Retrieval from Yahoo Finance
 
 import yfinance as yf
 
-# Κατεβάζουμε τα δεδομένα της μετοχής της PayPal από το 2020 έως το 2025
+# Retrieve PayPal stock data from 2020 to 2025
 
 paypal = yf.download('PYPL', start = '2020-01-01', end = '2025-01-01', auto_adjust=False)
 
 
-# Προβολή των πρώτων 5 γραμμών
+# Display the first 5 rows
 
 print(paypal.head())
 
-# Καθαρισμός Δεδομένων
+# Cleaning the Data
 
-# Έλεγχος για κενές τιμές και αν υπάρχουν προχωράμε στην αντικατάσταση τους
+# Check for missing values and, if any are found, proceed with their replacement
 
 print(paypal.isnull().sum())
 
 paypal = paypal.dropna()
 
-# Περιγραφική στατιστική των δεδομένων (για τις βασικές στήλες)
+# Descriptive statistics of the data (for the main columns)
 
 print(paypal.describe())
 
 
-# Οπτικοπίηση των δεδομένων
+# Data Visualization
 
-# Γραφική απεικόνηση (Close Price)
+# Graphical representation (Close Price)
 
 import matplotlib.pyplot as plt
 
@@ -36,33 +36,33 @@ plt.ylabel('Τιμή ($)')
 plt.grid()
 plt.show()
 
-# Κινητός Μέσος όρος 50 ημερών
+# 50-day Moving Average
 
 paypal['MA50'] = paypal['Close'].rolling(window=50).mean()
 paypal[['Close', 'MA50']].plot(figsize=(12, 6), title='Κινητός Μέσος όρος 50 ημερών')
 plt.grid()
 plt.show()
 
-# Όγκος Συναλλαγών
+# Trading Volume
 
 paypal['Volume'].plot(kind='bar', figsize=(12,4), title='Όγκος Συναλλαγών PayPal', alpha = 0.5)
 plt.tight_layout()
 plt.show()
 
-# Συσχέτιση Μεταβλητών
+# Correlation of Variables
 
 import seaborn as sns
 
 corr_matrix = paypal[['Open', 'High', 'Low', 'Close', 'Volume']].corr()
 
-# Οπτικοπίηση 
+# Visualization 
 
 plt.figure(figsize=(8,6))
 sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
 plt.title('Πίνακας Συσχέτισης Δειτών Μετοχής PayPal')
 plt.show()
 
-# Ανάλυση Μεταβλητότητας (Volatility)
+# Volatility
 
 paypal['Volatility'] = paypal['Close'].rolling(window=30).std()
 
@@ -70,14 +70,7 @@ paypal[['Close', 'Volatility']].plot(subplots=True, figsize=(12, 6), title=['Τ�
 plt.tight_layout()
 plt.show()
 
-# Candlestck Γράφημα
-
-import mplfinance as mpf
-
-mpf.plot(paypal[-60:], type='candle', volume=True, title='Candlestick Γράφημα PayPal - Τελευταίες 60 Ημέρες')
-
-
-# Αναγνώριση Τάσεων με Moving Averages
+# Trend Identification with Moving Averages
 
 paypal['MA20'] = paypal['Close'].rolling(window=20).mean()
 paypal['MA100'] = paypal['Close'].rolling(window=100).mean()
@@ -86,7 +79,7 @@ paypal[['Close', 'MA20', 'MA100']].plot(figsize=(12, 6), title='PayPal - MA20 κ
 plt.grid()
 plt.show()
 
-# Ανάλυση Απόδοσης
+# Stock Performance Analysis
 
 paypal['Daily Return'] = paypal['Close'].pct_change()
 
@@ -95,32 +88,33 @@ plt.grid()
 plt.show()
 
 
-# Προετοιμασία των Δεδομένων
+# Data Preparation
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
-# Δημιουργία νέας μεταβλητής για πρόβλεψη επόμενης μέρας
+# Creating a new variable for next-day prediction
 
 paypal['Target'] = paypal['Close'].shift(-1)
 
 X = paypal[['Close']][:-1]
 y = paypal['Target'][:-1]
 
-# Εκπαιδεύουμε το μοντέλο μας
+# Model Training
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-# Δοκιμάζουμε το μοντέλο 
+
+# Model Testing 
 
 model = LinearRegression()
 model.fit(X_train, y_train)
 
-# Προβλέπουμε
+# Predict
 
 predictions = model.predict(X_test)
 
-# Οπτικοποίηση Αποτελεσμάτων
+# Results Visualization
 
 plt.figure(figsize=(12, 6))
 plt.plot(y_test.values, label='Πραγματικές Τιμές')
@@ -130,7 +124,7 @@ plt.title('Πρόβλεψη Τιμής Κλεισίματος - PayPal')
 plt.grid()
 plt.show()
 
-# Αξιολόγηση Απόδοσης
+# Performance Evaluation
 
 from sklearn.metrics import mean_squared_error, r2_score
 
