@@ -45,4 +45,3 @@ print(f'Mean Squared Error: {mse}')
 print(f'R-squared:{r2}')
 
 
-# Το r2 = 0.9 (περίπου) δηλώνει ισχυρή προσαρμογή του μοντέλου στα δεδομένα
